@@ -11,9 +11,21 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE TABLE IF NOT EXISTS posts (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  user_id INT,
-  content VARCHAR(280),
+  user_id INT NOT NULL,
+
+  title VARCHAR(255) NOT NULL,
+  content TEXT NOT NULL,
+
+  campaign_id INT NOT NULL,
+  ai_score INT NOT NULL,
+
+  status ENUM('draft', 'published') DEFAULT 'draft',
+  image VARCHAR(255),
+
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ON UPDATE CURRENT_TIMESTAMP,
+
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 

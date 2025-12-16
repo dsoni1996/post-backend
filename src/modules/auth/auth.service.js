@@ -2,16 +2,25 @@ const db = require("../../config/db");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
-exports.registerUser = async (name, email, password) => {
+exports.registerUser = async (name, email, password, password_confirmation) => {
+
+  console.log(password , 'password')
+
+  if (!password) {
+    throw new Error("Password is required");
+  }
+
+  if (password !== password_confirmation) {
+    throw new Error("Passwords do not match");
+  }
+
   const hashedPassword = await bcrypt.hash(password, 10);
 
   const [result] = await db.query(
     "INSERT INTO users (name, email, password) VALUES (?, ?, ?)",
     [name, email, hashedPassword]
   );
-
-  return result.insertId;
-};
+}
 
 exports.loginUser = async (email, password) => {
   const [rows] = await db.query(
@@ -37,4 +46,4 @@ exports.loginUser = async (email, password) => {
   );
 
   return token;
-};
+}
