@@ -25,7 +25,11 @@ exports.getFeed = async () => {
       p.id,
       p.content,
       u.name,
-      p.created_at
+      p.created_at,
+      p.title,
+      p.campaign_id,
+      p.ai_score,
+      p.status
     FROM posts p
     JOIN users u ON u.id = p.user_id
     ORDER BY p.created_at DESC
@@ -59,17 +63,38 @@ exports.deletePostById = async (postId, userId) => {
 
 
 exports.updatePost = async (postId, userId, data) => {
+  const fields = [];
+  const values = [];
+
+  if (data.title) {
+    fields.push("title=?");
+    values.push(data.title);
+  }
+
+  if (data.content) {
+    fields.push("content=?");
+    values.push(data.content);
+  }
+
+  if (data.ai_score !== undefined) {
+    fields.push("ai_score=?");
+    values.push(data.ai_score);
+  }
+
+  if (data.status) {
+    fields.push("status=?");
+    values.push(data.status);
+  }
+
+  if (fields.length === 0) {
+    throw new Error("No fields to update");
+  }
+
+  values.push(postId, userId);
+
   const [result] = await db.query(
-    `UPDATE posts SET title=?, description=?, ai_score=?, status=?
-     WHERE id=? AND user_id=?`,
-    [
-      data.title,
-      data.content,
-      data.ai_score,
-      data.status,
-      postId,
-      userId
-    ]
+    `UPDATE posts SET ${fields.join(", ")} WHERE id=? AND user_id=?`,
+    values
   );
 
   if (result.affectedRows === 0) {
